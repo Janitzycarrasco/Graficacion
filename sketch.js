@@ -37,5 +37,26 @@ function dibujaPajaro(px, py){
   //Pico 
   fill("orange")
   triangle(px + 25, py - 5, px + 55, py + 5, px + 25, py + 15)
+}
+
+function keyPressed(){
+  if(keyCode == UP_ARROW){
+    direccion = "arriba"
+  }
+  if(keyCode == DOW_ARROW){
+    direccion = "abajo"
+  }
+  if(keyCode == LEFT_ARROW){
+    direccion = "izquierda"
+  }
+  if(keyCode == RIGTH_ARROW){
+    direccion = "derecha"
+    x += desp
+  }
+
+  //Efecto tunel 
+  
+
+
 
 }
