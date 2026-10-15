@@ -18,12 +18,35 @@ let tiempoAlas = 0;
 //Evita perder vidas seguidas al tocar un enemigo
 let proteccion = 0;
 
+//Controla el pico del pajaro
+let picoAbierto = false;
+let tiempoPico = 0;
+
+//Comida del pajaro
+let gusano = true;
+let manzana = true;
+let hoja = true;
+
+//Posicion de la comida
+let gx = 350;
+let gy = 100;
+
+let mx = 650;
+let my = 400;
+
+let hx = 400;
+let hy = 680;
+
+//Controla cada cuanto aparece comida
+let tiempoComida = 0;
+
 //Posicion horizontal del primer enemigo
 let ex1 = 100;
 //Posicion vertical del primer enemigo
 let ey1 = 200;
 //Velocidad del primer enemigo
 let vel1 = 2;
+let velY1 = 2;
 
 //Posicion horizontal del segundo enemigo
 let ex2 = 650;
@@ -31,9 +54,10 @@ let ex2 = 650;
 let ey2 = 550;
 //Velocidad del segundo enemigo
 let vel2 = 2;
+let velY2 = 2;
 
 function setup(){
-  createCanvas(800, 800);
+  createCanvas(windowWidth, windowHeight);
 }
 
 function draw(){
@@ -43,13 +67,35 @@ function draw(){
   if(juegoTerminado == true){
     background(0);
     fill("red");
-    //Centra el texto
     textAlign(CENTER);
-    //Tamaño del texto
     textSize(70);
-    //Muestra mensaje de game over
-    text("GAME OVER", 400, 410);
+    text("GAME OVER", width / 2, height / 2);
     return;
+  }
+
+  //Cuenta el tiempo para generar comida
+  tiempoComida++;
+
+  //Aparece comida nueva cada 3 segundos aproximadamente
+  if(tiempoComida >= 180){
+
+    //Genera un gusano en una posicion aleatoria
+    gx = random(40, width - 40);
+    gy = random(60, height - 40);
+    gusano = true;
+
+    //Genera una manzana en una posicion aleatoria
+    mx = random(40, width - 40);
+    my = random(60, height - 40);
+    manzana = true;
+
+    //Genera una hoja en una posicion aleatoria
+    hx = random(40, width - 40);
+    hy = random(60, height - 40);
+    hoja = true;
+
+    //Reinicia el contador
+    tiempoComida = 0;
   }
 
   //Cuenta el tiempo de la animacion de las alas
@@ -57,10 +103,16 @@ function draw(){
 
   //Comprueba si es momento de cambiar las alas
   if(tiempoAlas >= 10){
-    //Cambia la posicion de las alas
     alasArriba = !alasArriba;
-    //Reinicia el contador de animacion
     tiempoAlas = 0;
+  }
+
+  //Abre y cierra el pico
+  tiempoPico++;
+
+  if(tiempoPico >= 12){
+    picoAbierto = !picoAbierto;
+    tiempoPico = 0;
   }
 
   //Reduce el tiempo de proteccion despues de un golpe
@@ -87,7 +139,6 @@ function draw(){
 
   //Mueve el pajaro hacia arriba
   if(keyIsDown(UP_ARROW)){
-    //Comprueba que no haya un bloque en el camino
     if(!chocaBloque(x, y - desp)){
       y -= desp;
     }
@@ -95,7 +146,6 @@ function draw(){
 
   //Mueve el pajaro hacia abajo
   if(keyIsDown(DOWN_ARROW)){
-    //Comprueba que no haya un bloque en el camino
     if(!chocaBloque(x, y + desp)){
       y += desp;
     }
@@ -103,7 +153,6 @@ function draw(){
 
   //Mueve el pajaro hacia la izquierda
   if(keyIsDown(LEFT_ARROW)){
-    //Comprueba que no haya un bloque en el camino
     if(!chocaBloque(x - desp, y)){
       x -= desp;
     }
@@ -111,42 +160,95 @@ function draw(){
 
   //Mueve el pajaro hacia la derecha
   if(keyIsDown(RIGHT_ARROW)){
-    //Comprueba que no haya un bloque en el camino
     if(!chocaBloque(x + desp, y)){
       x += desp;
     }
   }
 
-  //Evita que el pajaro salga por los lados
-  x = constrain(x, 25, 775);
-  y = constrain(y, 25, 775);
+  //Evita que el pajaro salga de la pantalla
+  x = constrain(x, 25, width - 25);
+  y = constrain(y, 25, height - 25);
 
   //Primer obstaculo
   fill("sienna");
-  rect(130, 150, 100, 35);
+  rect(width * 0.16, height * 0.19, 100, 35);
 
   //Segundo obstaculo
   fill("sienna");
-  rect(480, 300, 100, 35);
+  rect(width * 0.60, height * 0.38, 100, 35);
 
   //Tercer obstaculo
   fill("sienna");
-  rect(250, 520, 100, 35);
+  rect(width * 0.31, height * 0.65, 100, 35);
 
-  //Mueve el primer enemigo
+  //Dibuja el gusano
+  if(gusano == true){
+    textSize(35);
+    textAlign(CENTER);
+    text("🐛", gx, gy);
+
+    //Comprueba si el pajaro come el gusano
+    if(abs(x - gx) < 35 && abs(y - gy) < 35){
+      gusano = false;
+      picoAbierto = true;
+      tiempoPico = 0;
+    }
+  }
+
+  //Dibuja la manzana
+  if(manzana == true){
+    textSize(35);
+    textAlign(CENTER);
+    text("🍎", mx, my);
+
+    //Comprueba si el pajaro come la manzana
+    if(abs(x - mx) < 35 && abs(y - my) < 35){
+      manzana = false;
+      picoAbierto = true;
+      tiempoPico = 0;
+    }
+  }
+
+  //Dibuja la hoja
+  if(hoja == true){
+    textSize(35);
+    textAlign(CENTER);
+    text("🍃", hx, hy);
+
+    //Comprueba si el pajaro come la hoja
+    if(abs(x - hx) < 35 && abs(y - hy) < 35){
+      hoja = false;
+      picoAbierto = true;
+      tiempoPico = 0;
+    }
+  }
+
+  //Mueve el primer enemigo horizontalmente
   ex1 += vel1;
 
-  //Cambia la direccion al llegar al borde
-  if(ex1 >= 760 || ex1 <= 40){
+  if(ex1 >= width - 40 || ex1 <= 40){
     vel1 *= -1;
   }
 
-  //Mueve el segundo enemigo
+  //Mueve el primer enemigo verticalmente
+  ey1 += velY1;
+
+  if(ey1 >= height - 40 || ey1 <= 40){
+    velY1 *= -1;
+  }
+
+  //Mueve el segundo enemigo horizontalmente
   ex2 += vel2;
 
-  //Cambia la direccion al llegar al borde
-  if(ex2 >= 760 || ex2 <= 40){
+  if(ex2 >= width - 40 || ex2 <= 40){
     vel2 *= -1;
+  }
+
+  //Mueve el segundo enemigo verticalmente
+  ey2 += velY2;
+
+  if(ey2 >= height - 40 || ey2 <= 40){
+    velY2 *= -1;
   }
 
   //Dibuja el primer enemigo
@@ -156,30 +258,25 @@ function draw(){
   dibujaEnemigo(ex2, ey2);
 
   //Comprueba si el pajaro toca el primer enemigo
-  if(colision(x - 20, y - 20, 40, 40, ex1 - 17, ey1 - 15, 34, 30)){
-    //Comprueba si el jugador puede recibir otro golpe
+  if(colision(x - 20, y - 20, 40, 40,
+  ex1 - 17, ey1 - 15, 34, 30)){
     if(proteccion == 0){
-      //Restar una vida
       vidas--;
-      //Activa el tiempo de proteccion
       proteccion = 60;
     }
   }
 
   //Comprueba si el pajaro toca el segundo enemigo
-  if(colision(x - 20, y - 20, 40, 40, ex2 - 17, ey2 - 15, 34, 30)){
-    //Comprueba si el jugador puede recibir otro golpe
+  if(colision(x - 20, y - 20, 40, 40,
+  ex2 - 17, ey2 - 15, 34, 30)){
     if(proteccion == 0){
-      //Restar una vida
       vidas--;
-      //Activa el tiempo de proteccion
       proteccion = 60;
     }
   }
 
   //Dibuja el pajaro y lo hace parpadear despues de un golpe
   if(proteccion == 0 || frameCount % 10 < 5){
-    //Dibuja el personaje en su posicion actual
     dibujaPajaro(x, y);
   }
 
@@ -187,17 +284,15 @@ function draw(){
   fill("pink");
   textAlign(LEFT);
   textSize(25);
-  //Muestra las vidas restantes
   text("Vidas: " + vidas, 20, 35);
 
   //Comprueba si las vidas llegaron a cero
   if(vidas <= 0){
-    //Activa pantalla Game Over
     juegoTerminado = true;
   }
 }
 
-//Dibuja el pajaro usando las posiciones recibidas
+//Dibuja el pajaro
 function dibujaPajaro(px, py){
   push();
   translate(px, py);
@@ -217,35 +312,81 @@ function dibujaPajaro(px, py){
     rotate(HALF_PI);
   }
 
-  //Color del cuerpo
+  noStroke();
+
+  //Contorno negro del cuerpo
+  fill("black");
+  rect(-27, -15, 8, 24);
+  rect(-19, -23, 27, 8);
+  rect(-11, -31, 27, 8);
+  rect(5, -23, 16, 8);
+  rect(13, -15, 8, 24);
+  rect(5, 9, 16, 8);
+  rect(-11, 17, 24, 8);
+  rect(-19, 9, 8, 8);
+  rect(-27, 1, 8, 8);
+
+  //Cuerpo amarillo
   fill("yellow");
+  rect(-19, -15, 8, 24);
+  rect(-11, -23, 19, 8);
+  rect(-3, -31, 8, 8);
+  rect(5, -15, 8, 24);
+  rect(-11, 9, 24, 8);
+  rect(-19, 1, 8, 8);
+  rect(-11, -7, 24, 16);
 
-  //Cuerpo
-  arc(0, 0, 100, 100, QUARTER_PI, TWO_PI - QUARTER_PI, PIE);
+  //Parte naranja del cuerpo
+  fill("orange");
+  rect(5, 1, 8, 8);
+  rect(-3, 9, 16, 8);
 
-  //Color del ojo
-  fill("blue");
-  circle(-17, -20, 15);
+  //Ojo blanco con contorno negro
+  fill("black");
+  rect(0, -25, 24, 24);
 
-  //Color de las alas
-  fill("gold");
+  fill("white");
+  rect(5, -20, 14, 14);
 
-  //Comprueba si las alas estan levantadas
+  //Pupila
+  fill("black");
+  rect(13, -16, 6, 10);
+
+  //Ala animada
+  fill("black");
+
   if(alasArriba == true){
-    //Dibuja el ala izquierda levantada
-    ellipse(-15, 15, 35, 12);
-    //Dibuja el ala derecha levantada
-    ellipse(15, 15, 35, 12);
+    rect(-19, 0, 19, 16);
+    fill("orange");
+    rect(-11, 4, 11, 8);
   }else{
-    //Dibuja el ala izquierda bajada
-    ellipse(-15, 25, 35, 20);
-    //Dibuja el ala derecha bajada
-    ellipse(15, 25, 35, 20);
+    rect(-19, 5, 19, 16);
+    fill("orange");
+    rect(-11, 9, 11, 8);
   }
 
-  //Pico
-  fill("orange");
-  triangle(25, -5, 55, 5, 25, 15);
+  //Pico negro
+  fill("black");
+
+  if(picoAbierto == true){
+    //Pico abierto
+    rect(13, -5, 16, 8);
+    rect(21, 3, 16, 8);
+    rect(29, 11, 8, 8);
+
+    //Parte superior del pico
+    fill("orange");
+    rect(16, -2, 16, 3);
+
+    //Parte inferior del pico
+    fill("orangered");
+    rect(24, 6, 11, 3);
+  }else{
+    //Pico cerrado
+    rect(13, -5, 24, 16);
+    fill("orange");
+    rect(16, -2, 19, 8);
+  }
 
   pop();
 }
@@ -256,7 +397,7 @@ function dibujaEnemigo(ex, ey){
   fill("saddlebrown");
   ellipse(ex, ey, 34, 30);
 
-  //Cara 
+  //Cara
   fill("burlywood");
   ellipse(ex, ey + 5, 22, 15);
 
@@ -277,26 +418,30 @@ function dibujaEnemigo(ex, ey){
 //Comprueba si el pajaro chocara contra un obstaculo
 function chocaBloque(nx, ny){
   //Comprueba la colision con el primer bloque
-  if(colision(nx - 20, ny - 20, 40, 40, 130, 150, 100, 35)){
+  if(colision(nx - 20, ny - 20, 40, 40,
+  width * 0.16, height * 0.19, 100, 35)){
     return true;
   }
 
   //Comprueba la colision con el segundo bloque
-  if(colision(nx - 20, ny - 20, 40, 40, 480, 300, 100, 35)){
+  if(colision(nx - 20, ny - 20, 40, 40,
+  width * 0.60, height * 0.38, 100, 35)){
     return true;
   }
 
   //Comprueba la colision con el tercer bloque
-  if(colision(nx - 20, ny - 20, 40, 40, 250, 520, 100, 35)){
+  if(colision(nx - 20, ny - 20, 40, 40,
+  width * 0.31, height * 0.65, 100, 35)){
     return true;
   }
+
   return false;
 }
 
 //Comprueba si dos rectangulos se tocan
 function colision(ax, ay, aw, ah, bx, by, bw, bh){
-  //Comprueba que los lados horizontales y verticales se crucen
-  return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+  return ax < bx + bw && ax + aw > bx &&
+  ay < by + bh && ay + ah > by;
 }
 
 function keyPressed(){
@@ -317,4 +462,9 @@ function keyPressed(){
   }
 
   return false;
+}
+
+//Ajusta el juego cuando cambia el tamaño de la ventana
+function windowResized(){
+  resizeCanvas(windowWidth, windowHeight);
 }
