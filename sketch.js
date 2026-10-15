@@ -113,6 +113,7 @@ function keyPressed(){
   if(keyCode == UP_ARROW){
     direccion = "arriba"
   }
+}
   if(keyCode == DOWN_ARROW){
     direccion = "abajo"
   }
@@ -124,10 +125,221 @@ function keyPressed(){
     x += desp
   }
 
-  //Efecto tunel 
+  //Mueve el pajaro hacia arriba 
+  if(direccion == "arriba"){
+    //Comprueba que no haya un bloque en el camino 
+    if(!chocaBloque(x, y - desp)){
+      y-= desp;
+    }
+  }
 
-  
+  //Mueve el pajaro hacia abajo
+  if(direccion == "abajo"){
+    //Comprueba que no haya un bloque en el camino 
+    if(!chocaBloque(x, y + desp)){
+      y += desp;
+    }
+  }
+
+  //Mueve el pajaro hacia la izquierda 
+  if(direccion == "izquierda"){
+    //Comprueba que no haya un bloque en el camino 
+    if(!chocaBloque(x - desp, y)){
+      x -= desp;
+    }
+  }
+
+  //Mueve el pajaro hacia la derecha
+  if(direccion == "derecha"){
+    //Comprueba que no haya un bloque en el camino 
+    if(!chocaBloque(x + desp, y)){
+      x += desp;
+    }
+  }
+
+  //Evita que el pajaro salga por los lados 
+  x = constrain(x, 25, 775);
+  y = constrain(y, 25, 745);
+
+  //Primer obstaculo 
+  fill("sienna");
+  React(130, 150, 100, 35);
+
+  //Segundo obstaculo 
+  fill("sienna");
+  React(480, 300, 100, 35);
+
+  //Segundo obstaculo 
+  fill("sienna");
+  React(250, 520, 100, 35);
+
+  //Mueve el primer enemigo 
+  ex1 += vel1;
+  //Cambia la direccion al llegar al borde 
+  if(ex1 >= 760 || ex1 <= 40){
+    vel1 *= -1;
+  }
+
+  //Mueve el segundo enemigo 
+  ex2 += vel2;
+  //Cambia la direccion al llegar al borde 
+  if(ex2 >= 760 || ex2 <= 40){
+    vel1 *= -1;
+  }
+
+  //Dibuja el primer enemigo 
+  dibujaEnemigo(ex1, ey1);
+
+  //Dibuja al segundo enemigo 
+  dibujaEnemigo(ex2, ey2);
+
+  //Comprueba si el pajaro toca el primer enemigo 
+  if(colision(x - 20, y - 20, 40, 40, ex1 - 17, ey1 - 15, 34, 30)){
+    //Comprueba si el jugador puede recibir otro golpe 
+    if(proteccion == 0){
+      //Restar una vida 
+      vidas --;
+      //Activa el tiempo de proteccion 
+      proteccion = 60;
+    }
+  }
+
+  //Comprueba si el pajaro toca el segundo enemigo 
+  if(colision(x - 20, y - 20, 40, 40, ex2 - 17, ey2 - 15, 34, 30)){
+    //Comprueba si el jugador puede recibir otro golpe 
+    if(proteccion == 0){
+      //Restar una vida 
+      vidas --;
+      //Activa el tiempo de proteccion 
+      proteccion = 60;
+    }
+  }
+
+  //Dibuja el pajaro y lo hace parpadear despues de un golpe 
+  if(proteccion == 0 || frameCout % 10 < 5){
+    //Dibuja el personaje en su pocision actual 
+    dibujaPajaro(x,y);
+  }
+
+  //Color para el contador 
+  fill("pink");
+  textAling(LEFT);
+  testZise(25);
+  //Muestra las vidas restantes 
+  text("Vidas: " + vidas, 20, 35);
+
+  //Comprueba si las vidas llegaron a cero 
+  if(vidas <= 0){
+    //Ativa pantalla Game Over 
+    juegoTerminado = true;
+  }
+
+  //Dibuja el pajaro usando las posiciones recibidas
+  function dibujaPajaro(px, py){
+    push();
+    translate(px, py);
+
+    //Voltea el pajaro cuando mira hacia la izquierda 
+    if(direccion == "izquierda"){
+      scale(-1, 1);
+    }
+
+    //Gira el pajaro cuando va hacia arriba 
+    if(direccion == "arriba"){
+      rotate(-HALF_PI);
+    }
+
+    //Color del cuerpo 
+    fill("yellow");
+    //Cuerpo 
+    arc(0, 0, 100, 100, QUARTER_PI, TWO_PI - QUARTER_PI, PIE);
+
+    //Color del ojo 
+    fill("blue");
+    circle(-17, -20, 25);
+
+    //Color de las alas 
+    fill("gold");
 
 
+    // Comprueba si las alas estan levantadas
+    if(alasArriba == true){
+     // Dibuja el ala izquierda levantada
+     ellipse(-15, 15, 35, 12);
+     // Dibuja el ala derecha levantada
+     ellipse(15, 15, 35, 12);
 
-}
+    }else{
+      // Dibuja el ala izquierda bajada
+      ellipse(-15, 25, 35, 20);
+      // Dibuja el ala derecha bajada
+      ellipse(15, 25, 35, 20);
+  }
+
+  //Pico
+  fill("orange");
+  triangle(25, -5, 55, 5, 25, 15);
+  pop();
+
+  //Enemigo 
+  function dibujaEnemigo(ex, ey){
+    fill("saddlebrown");
+    ellipse(ex, ey, 34, 30);
+    fill("burlywood");
+    ellipse(ex, ey + 5, 22, 15);
+    fill("white");
+    circle(ex - 7, ey - 4, 9);
+    circle(ex + 7, ey - 4, 9);
+    fill("black");
+    circle(ex - 7, ey - 4, 4);
+    circle(ex + 7, ey - 4, 4);
+    rect(ex - 8, ey + 8, 16, 3);
+  }
+
+  // Comprueba si el pajaro chocara contra un obstaculo
+  function chocaBloque(nx, ny){
+    if(colision(nx - 20, ny - 20, 40, 40, 130, 150, 100, 35)){
+      return true;
+    }
+
+    // Comprueba la colision con el segundo bloque
+    if(colision(nx - 20, ny - 20, 40, 40, 480, 300, 100, 35)){
+      return true;
+    }
+
+    if(colision(nx - 20, ny - 20, 40, 40, 250, 520, 100, 35)){
+      return true;
+    }
+
+
+    // Indica que no hay obstaculos en el camino
+    return false;
+  }
+
+  // Comprueba si dos rectangulos se tocan
+  function colision(ax, ay, aw, ah, bx, by, bw, bh){
+    // Comprueba que los lados horizontales se crucen
+    return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+  }
+
+  // Detecta cuando se presiona una tecla
+  function keyPressed(){
+    if(keyCode == UP_ARROW){
+      direccion = "arriba";
+    }
+
+    if(keyCode == DOWN_ARROW){
+      direccion = "abajo";
+    }
+
+    if(keyCode == LEFT_ARROW){
+      direccion = "izquierda";
+    }
+
+    if(keyCode == RIGHT_ARROW){
+      direccion = "derecha";
+    }
+
+    return false;
+  }
+  }
